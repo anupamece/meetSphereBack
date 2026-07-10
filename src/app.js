@@ -9,6 +9,6 @@ app.use(cookieParser());
 app.use(express.json());
 
 import userRouter from "./routes/user.router.js";
-app.use("/api/auth/register", userRouter);
+app.use("/api/auth", userRouter);
 
 export {app};
