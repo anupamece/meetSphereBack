@@ -13,6 +13,6 @@ import eventRouter from "./routes/events.routes.js";
 
 
 app.use("/api/auth", userRouter);
-app.use("/api/auth" , eventRouter);
+app.use("/api/events", eventRouter);
 
 export {app};

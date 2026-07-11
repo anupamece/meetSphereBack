@@ -6,14 +6,14 @@ const eventSchema = new Schema({
   description: { type: String, required: true },
   category: { type: String, enum: ['music' , 'nightlife' , 'comedy' , 'sports'
     , 'conference' , 'food' , 'festival' , 'theater' , 'workshop' , 'fitness'
-  ], default: 'other' },
-  coverImage: { type: String ,  },
+  ], default: 'music' },
+  coverImage: { type: String },
   images: [{ type: String }],
-  venue: [{
+  venue: {
     name: String,
     address: String,
     city: String,
-  }],
+  },
   startDateTime: { type: Date, required: true },
   endDateTime: { type: Date, required: true },
   status: { type: String, enum: ['draft', 'published', 'cancelled', 'completed'], default: 'draft' },
