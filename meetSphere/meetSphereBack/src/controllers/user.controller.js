@@ -65,10 +65,30 @@ const loginUser= async(req,res)=>{
     }
     const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id);
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
-    return res.status(200).json({message : "User logged in successfully", token: accessToken, refreshToken, user: loggedInUser});
+    return res.status(200).json({message : "User logged in successfully", token: accessToken, refreshToken, user: loggedInUser})
   }
+
+
   catch(err){
     return res.status(500).json({message : "Error logging in user"});
   }
 }
-export {registerUser, loginUser};
+
+const logoutUser = async(req,res)=>{
+  try{
+    await User.findByIdAndUpdate(req.user._id , {refreshToken : null});
+    const options = {
+      httpOnly: true,
+    }
+    return res.
+    status(200)
+    .clearCookie("refreshToken", options)
+    .clearCookie("accessToken", options)
+    .json({message : "User logged out successfully"});
+  }
+  catch(err){
+    return res.status(500).json({message : "Error logging out user"});  
+     
+  }
+}
+export {registerUser, loginUser , logoutUser};
