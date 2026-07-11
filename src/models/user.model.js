@@ -12,6 +12,7 @@ const userSchema = new Schema({
   role: { type: String, enum: ['attendee', 'organizer', 'admin'], default: 'attendee' },
   avatar: { type: String },
   phone: { type: String },
+  refreshToken: { type: String },
 }, { timestamps: true });
 
 userSchema.pre('save', async function(next) {
@@ -36,7 +37,7 @@ userSchema.methods.genrateAccessToken = function() {
   {expiresIn : '6h'},
   )
 }
-userSchema.methods.genrateAccessToken = function() {
+userSchema.methods.genrateRefreshToken = function() {
   return jwt.sign({
     _id: this._id,
     name: this.name,
