@@ -52,12 +52,14 @@ const getEvents = async (req , res)=>{
     const limit= parseInt(req.query.limit) || 10; // Default limit is 10
 
     const events= await Event.aggregate([
-      {sample: {size: limit}}
+      {$sample: {size: limit}}
     ]);
     return res.status(200).json({message : "Events fetched successfully" , events : events});
   }
   catch(err){
-    return res.status(500).json({message : "Error fetching events"});
+    console.log(err)
+    return res.status(500).json({message : "Error fetching events!!"});
+    
   }
 }
 
@@ -77,4 +79,20 @@ const isfav = async (req , res)=>{
   }
 }
 
-export {createEvent , getEvents , isfav};
+const fetchOrganiserEvents= async (req,res)=>{
+  try{
+    const events = await Event.find({organizer:req.user._id});
+
+    return res.status(200).json({
+      message:"Organiser Events fetched success!!",
+      events,
+    });
+  }
+  catch(err){
+    return res.status(500).json({
+      message:"Error fetching organiser events"
+    });
+  }
+};
+
+export {createEvent , getEvents , isfav, fetchOrganiserEvents};
