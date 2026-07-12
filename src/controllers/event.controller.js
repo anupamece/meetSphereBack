@@ -57,5 +57,20 @@ const getEvents = async (req , res)=>{
   }
 }
 
-export {createEvent , getEvents};
+const isfav = async (req , res)=>{
+  try{
+    const eventId = req.params.id;
+    const event = await Event.findById(eventId);
+    if(!event){
+      return res.status(404).json({message : "Event not found"});
+    }
+    event.isfavorite = !event.isfavorite;
+    await event.save();
+    return res.status(200).json({message : "Favorite status updated successfully" , isfavorite : event.isfavorite});
+  }
+  catch(err){
+    return res.status(500).json({message : "Error updating favorite status"});
+  }
+}
 
+export {createEvent , getEvents , isfav};

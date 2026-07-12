@@ -14,6 +14,7 @@ const eventSchema = new Schema({
     address: String,
     city: String,
   },
+  isfavorite: { type: Boolean, default: false },
   startDateTime: { type: Date, required: true },
   endDateTime: { type: Date, required: true },
   status: { type: String, enum: ['draft', 'published', 'cancelled', 'completed'], default: 'draft' },
