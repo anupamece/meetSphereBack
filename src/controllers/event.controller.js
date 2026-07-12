@@ -49,7 +49,11 @@ const createEvent = async (req , res)=>{
 
 const getEvents = async (req , res)=>{
   try{
-    const events = await Event.find();
+    const limit= parseInt(req.query.limit) || 10; // Default limit is 10
+
+    const events= await Event.aggregate([
+      {sample: {size: limit}}
+    ]);
     return res.status(200).json({message : "Events fetched successfully" , events : events});
   }
   catch(err){
