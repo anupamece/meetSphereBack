@@ -1,10 +1,27 @@
 import {Event} from "../models/events.model.js";
+import {uploadOnCloudinary} from "../utils/cloudinary.js";
 
 const createEvent = async (req , res)=>{
   try{
       const {title , description , category , startDateTime , endDateTime , status , attendeeCount} = req.body;
       const coverImageFile = req.files?.coverImage?.[0];
       const imageFiles = req.files?.images || [];
+      
+      const uploadedCoverImage=await uploadOnCloudinary(coverImageFile.path);
+      if(!uploadedCoverImage){
+        return res.status(500).json({message:'Cover image Upload failed'});
+      }
+
+
+      const uploadedImages= await Promise.all(
+        imageFiles.map((img)=>(
+          uploadOnCloudinary(img.path)
+        ))
+      );
+      const imageUrls=uploadedImages.filter(Boolean).map((image)=>(
+        image.secure_url
+      ))
+
 
       if(!title || !description || !category || !startDateTime || !endDateTime || !coverImageFile){
           return res.status(400).json({message : "Missing required fields"});
@@ -30,8 +47,8 @@ const createEvent = async (req , res)=>{
         title,
         description,
         category,
-        coverImage: coverImageFile.path,
-        images: imageFiles.map((file) => file.path),
+        coverImage: uploadedCoverImage.secure_url,
+        images: imageUrls,
         venue,
         startDateTime,
         endDateTime,
