@@ -17,7 +17,7 @@ const eventSchema = new Schema({
   isfavorite: { type: Boolean, default: false },
   startDateTime: { type: Date, required: true },
   endDateTime: { type: Date, required: true },
-  status: { type: String, enum: ['draft', 'published', 'cancelled', 'completed'], default: 'draft' },
+  status: { type: String, enum: ['draft','upcoming','live','completed'], default: 'draft' },
   attendeeCount: { type: Number, default: 0 },
   tags: [{ type: String }],
 }, { timestamps: true });

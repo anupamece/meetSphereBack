@@ -120,4 +120,43 @@ const eventDetails = async(req , res)=>{
     }
 }
 
-export {createEvent , getEvents , isfav, eventDetails};
+const fetchOrganiserEvents = async (req, res) => {
+  try {
+    const events = await Event.find({ organizer: req.user._id }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({
+      message: "Organiser Events fetched success!!",
+      events,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error fetching organiser events",
+    });
+  }
+};
+
+
+const deleteHostEvent= async (req,res) => {
+  const eventId=req.params.id;
+  try{
+      const deleted=await Event.findOneAndDelete({_id:eventId})
+      if(!deleted){
+        return res.status(404).json({
+          message:"Event not found or you are not allowed to delete it"
+        })
+      }
+      console.log(deleted);
+      return res.status(200).json({
+        message:"event deleted successfully!"
+      })
+  }
+  catch(err){
+    return res.status(500).json({
+      message:"error deleting the event"
+    })
+  }
+  
+}
+export {createEvent ,deleteHostEvent, getEvents , isfav, eventDetails, fetchOrganiserEvents};
