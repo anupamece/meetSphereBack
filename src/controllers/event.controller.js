@@ -89,25 +89,18 @@ const isfav = async (req , res)=>{
   }
 }
 
-<<<<<<< HEAD
-const fetchOrganiserEvents= async (req,res)=>{
-  try{
-    const events = await Event.find({organizer:req.user._id});
+const eventDetails = async(req , res)=>{
+    try{
+       const eventId = req.params.id;
+       const event = await Event.findById(eventId);
+       if (!event) {
+         return res.status(404).json({message : "Event not found"});
+       }
+       return res.status(200).json({message : "Event details fetched successfully" , event : event}); 
+    }
+    catch(err){
+        return res.status(500).json({message : "Error fetching event details"});
+    }
+}
 
-    return res.status(200).json({
-      message:"Organiser Events fetched success!!",
-      events,
-    });
-  }
-  catch(err){
-    return res.status(500).json({
-      message:"Error fetching organiser events"
-    });
-  }
-};
-
-export {createEvent , getEvents , isfav, fetchOrganiserEvents};
-=======
-
-export {createEvent , getEvents , isfav};
->>>>>>> 9ec131c (backend fav)
+export {createEvent , getEvents , isfav, eventDetails};
