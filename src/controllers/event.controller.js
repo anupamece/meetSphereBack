@@ -1,4 +1,5 @@
 import {Event} from "../models/events.model.js";
+import { Favorite } from "../models/favorite.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";
 
 const createEvent = async (req , res)=>{
@@ -83,33 +84,40 @@ const getEvents = async (req , res)=>{
 const isfav = async (req , res)=>{
   try{
     const eventId = req.params.id;
+    const userId = req.user._id;
+
     const event = await Event.findById(eventId);
     if(!event){
       return res.status(404).json({message : "Event not found"});
     }
-    event.isfavorite = !event.isfavorite;
-    await event.save();
-    return res.status(200).json({message : "Favorite status updated successfully" , isfavorite : event.isfavorite});
+
+    const existingFavorite = await Favorite.findOne({ user: userId, event: eventId });
+
+    if (existingFavorite) {
+      await Favorite.deleteOne({ _id: existingFavorite._id });
+      return res.status(200).json({message : "Favorite removed successfully" , isfavorite : false});
+    }
+
+    await Favorite.create({ user: userId, event: eventId });
+    return res.status(200).json({message : "Favorite added successfully" , isfavorite : true});
   }
   catch(err){
     return res.status(500).json({message : "Error updating favorite status"});
   }
 }
 
-const fetchOrganiserEvents= async (req,res)=>{
-  try{
-    const events = await Event.find({organizer:req.user._id});
+const eventDetails = async(req , res)=>{
+    try{
+       const eventId = req.params.id;
+       const event = await Event.findById(eventId);
+       if (!event) {
+         return res.status(404).json({message : "Event not found"});
+       }
+       return res.status(200).json({message : "Event details fetched successfully" , event : event}); 
+    }
+    catch(err){
+        return res.status(500).json({message : "Error fetching event details"});
+    }
+}
 
-    return res.status(200).json({
-      message:"Organiser Events fetched success!!",
-      events,
-    });
-  }
-  catch(err){
-    return res.status(500).json({
-      message:"Error fetching organiser events"
-    });
-  }
-};
-
-export {createEvent , getEvents , isfav, fetchOrganiserEvents};
+export {createEvent , getEvents , isfav, eventDetails};
