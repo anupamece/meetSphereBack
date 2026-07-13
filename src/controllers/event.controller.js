@@ -1,4 +1,5 @@
 import {Event} from "../models/events.model.js";
+import { Favorite } from "../models/favorite.model.js";
 
 const createEvent = async (req , res)=>{
   try{
@@ -66,19 +67,29 @@ const getEvents = async (req , res)=>{
 const isfav = async (req , res)=>{
   try{
     const eventId = req.params.id;
+    const userId = req.user._id;
+
     const event = await Event.findById(eventId);
     if(!event){
       return res.status(404).json({message : "Event not found"});
     }
-    event.isfavorite = !event.isfavorite;
-    await event.save();
-    return res.status(200).json({message : "Favorite status updated successfully" , isfavorite : event.isfavorite});
+
+    const existingFavorite = await Favorite.findOne({ user: userId, event: eventId });
+
+    if (existingFavorite) {
+      await Favorite.deleteOne({ _id: existingFavorite._id });
+      return res.status(200).json({message : "Favorite removed successfully" , isfavorite : false});
+    }
+
+    await Favorite.create({ user: userId, event: eventId });
+    return res.status(200).json({message : "Favorite added successfully" , isfavorite : true});
   }
   catch(err){
     return res.status(500).json({message : "Error updating favorite status"});
   }
 }
 
+<<<<<<< HEAD
 const fetchOrganiserEvents= async (req,res)=>{
   try{
     const events = await Event.find({organizer:req.user._id});
@@ -96,3 +107,7 @@ const fetchOrganiserEvents= async (req,res)=>{
 };
 
 export {createEvent , getEvents , isfav, fetchOrganiserEvents};
+=======
+
+export {createEvent , getEvents , isfav};
+>>>>>>> 9ec131c (backend fav)
