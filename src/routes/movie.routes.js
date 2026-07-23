@@ -12,6 +12,7 @@ router.post(
       maxCount: 1,
     },
   ]),
+  verifyJWT,
   postMovies
 );
 router.get('/getMovies', getMovies);

@@ -38,13 +38,19 @@ const registerUser = async(req , res)=>{
         role
       }
     )
+    const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id);
     const createdUser = await User.findById(user._id).select("-password -refreshToken");
 
     if(!createdUser){
       return res.status(400).json({message : "User not created"});
     }
     
-    return res.status(201).json({message : "User created successfully" , user : createdUser});
+    return res.status(201).json({
+      message : "User created successfully",
+      token: accessToken,
+      refreshToken,
+      user : createdUser
+    });
   }
   catch(err){
     return res.status(500).json({message : "Error creating user"});

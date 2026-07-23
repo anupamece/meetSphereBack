@@ -17,6 +17,9 @@ const postMovies = async (req, res) => {
       director,
       status,
       genre,
+      ticketPrice,
+      totalTickets,
+      theatre,
     } = req.body;
 
     const posterFile = req.files?.poster?.[0];
@@ -27,6 +30,7 @@ const postMovies = async (req, res) => {
       !language ||
       !duration ||
       !releaseDate ||
+      !theatre ||
       !posterFile
     ) {
       return res.status(400).json({
@@ -35,10 +39,16 @@ const postMovies = async (req, res) => {
     }
 
     const uploadedPoster = await uploadOnCloudinary(posterFile.path);
+    if (!uploadedPoster) {
+      return res.status(500).json({
+        message: "Poster upload failed",
+      });
+    }
 
     console.log("Uploaded Poster:", uploadedPoster);
 
     const movie = await Movie.create({
+      organizer: req.user._id, // Assuming you have user authentication and the user ID is available in req.user
       title,
       description,
       poster: uploadedPoster.secure_url,
@@ -49,7 +59,12 @@ const postMovies = async (req, res) => {
       certificate,
       director,
       status,
-      genre: genre.split(",").map((g) => g.trim()),
+      ticketPrice: Number(ticketPrice) || 0,
+      totalTickets: Number(totalTickets) || 50,
+      theatre,
+      genre: typeof genre === "string"
+        ? genre.split(",").map((g) => g.trim()).filter(Boolean)
+        : [],
     });
 
     return res.status(201).json({

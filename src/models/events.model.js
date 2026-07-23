@@ -20,6 +20,11 @@ const eventSchema = new Schema({
   status: { type: String, enum: ['draft','upcoming','live','completed'], default: 'draft' },
   attendeeCount: { type: Number, default: 0 },
   tags: [{ type: String }],
+  ticketPrice: { type: Number, default: 0 , min: 0 },
+  totalTickets: { type: Number, default: 50 , min: 1 },
+  ticketsSold: { type: Number, default: 0 },
+  
 }, { timestamps: true });
 
-export const Event = mongoose.model("Event" , eventSchema);
+const Event = mongoose.model("Event" , eventSchema);
+export default Event;

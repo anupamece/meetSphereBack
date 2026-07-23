@@ -1,10 +1,11 @@
-import {Event} from "../models/events.model.js";
+import Event from "../models/events.model.js";
 import { Favorite } from "../models/favorite.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";
-
+import Dining from "../models/dining.model.js";
+import Movie from "../models/movies.model.js";
 const createEvent = async (req , res)=>{
   try{
-      const {title , description , category , startDateTime , endDateTime , status , attendeeCount} = req.body;
+      const {title , description , category , startDateTime , endDateTime , status , attendeeCount, ticketPrice, totalTickets} = req.body;
       const coverImageFile = req.files?.coverImage?.[0];
       const imageFiles = req.files?.images || [];
       
@@ -24,7 +25,7 @@ const createEvent = async (req , res)=>{
       ))
 
 
-      if(!title || !description || !category || !startDateTime || !endDateTime || !coverImageFile){
+      if(!title || !description || !category || !startDateTime || !endDateTime || !coverImageFile ||!ticketPrice){
           return res.status(400).json({message : "Missing required fields"});
       }
 
@@ -55,7 +56,9 @@ const createEvent = async (req , res)=>{
         endDateTime,
         status,
         attendeeCount,
-        tags
+        tags,
+        ticketPrice,
+        totalTickets
       })
       return res.status(201).json({message : "Event created successfully" , event : newEvent
       })
@@ -125,10 +128,17 @@ const fetchOrganiserEvents = async (req, res) => {
     const events = await Event.find({ organizer: req.user._id }).sort({
       createdAt: -1,
     });
-
+    const diningEvents = await Dining.find({ organizer: req.user._id }).sort({
+      createdAt: -1,
+    });
+    const movieEvents = await Movie.find({ organizer: req.user._id }).sort({
+      createdAt: -1,
+    });
     return res.status(200).json({
       message: "Organiser Events fetched success!!",
       events,
+      diningEvents,
+      movieEvents
     });
   } catch (err) {
     return res.status(500).json({
@@ -141,7 +151,7 @@ const fetchOrganiserEvents = async (req, res) => {
 const deleteHostEvent= async (req,res) => {
   const eventId=req.params.id;
   try{
-      const deleted=await Event.findOneAndDelete({_id:eventId})
+      const deleted=await Event.findOneAndDelete({_id:eventId, organizer: req.user._id})
       if(!deleted){
         return res.status(404).json({
           message:"Event not found or you are not allowed to delete it"

@@ -18,6 +18,6 @@ router.get('/getEvents', getEvents);
 router.get('/my-events', verifyJWT, fetchOrganiserEvents);
 router.post('/isfav/:id', verifyJWT, isfav);
 router.get('/eventDetails/:id', eventDetails);
-router.post('/deleteEvent/:id',deleteHostEvent);
+router.post('/deleteEvent/:id', verifyJWT, deleteHostEvent);
 
 export default router;
