@@ -59,6 +59,7 @@ const postMovies = async (req, res) => {
       certificate,
       director,
       status,
+      rating: Number(req.body.rating) || 0,
       ticketPrice: Number(ticketPrice) || 0,
       totalTickets: Number(totalTickets) || 50,
       theatre,

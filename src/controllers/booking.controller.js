@@ -2,6 +2,9 @@ import Booking from "../models/booking.model.js";
 import Event from "../models/events.model.js";
 import Movie from "../models/movies.model.js";
 import Dining from "../models/dining.model.js";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const getModelByType = (itemType) => {
   const models = {
@@ -102,10 +105,28 @@ const initiateBooking = async (req,res)=>{
             attendeeName,
             attendeeEmail
         })
+        
+        if(totalAmount >0){
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: Math.round(totalAmount * 100), //amount in cents
+                currency: 'inr',
+                metadata: {
+                    bookingId: booking._id.toString(),
+                    userId: req.user._id.toString(),
+                    eventType: itemType,
+                },
+                receipt_email:attendeeEmail,
+            });
 
+            return res.status(200).json({
+                message:"Booking initiated successfully",
+                booking,
+                clientSecret: paymentIntent.client_secret,
+            });
+        }
         return res.status(200).json({
             message:"Booking initiated successfully",
-            booking
+            booking,clientSecret:null
         });
 
     }

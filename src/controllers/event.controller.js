@@ -3,6 +3,7 @@ import { Favorite } from "../models/favorite.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";
 import Dining from "../models/dining.model.js";
 import Movie from "../models/movies.model.js";
+
 const createEvent = async (req , res)=>{
   try{
       const {title , description , category , startDateTime , endDateTime , status , attendeeCount, ticketPrice, totalTickets} = req.body;
@@ -14,7 +15,6 @@ const createEvent = async (req , res)=>{
         return res.status(500).json({message:'Cover image Upload failed'});
       }
 
-
       const uploadedImages= await Promise.all(
         imageFiles.map((img)=>(
           uploadOnCloudinary(img.path)
@@ -23,7 +23,6 @@ const createEvent = async (req , res)=>{
       const imageUrls=uploadedImages.filter(Boolean).map((image)=>(
         image.secure_url
       ))
-
 
       if(!title || !description || !category || !startDateTime || !endDateTime || !coverImageFile ||!ticketPrice){
           return res.status(400).json({message : "Missing required fields"});
@@ -34,14 +33,32 @@ const createEvent = async (req , res)=>{
         try {
           tags = JSON.parse(req.body.tags);
         } catch (error) {
-          return res.status(400).json({ message: "Invalid tags format" });
+          // If tags came as array or non-JSON string
+          if (Array.isArray(req.body.tags)) {
+            tags = req.body.tags;
+          }
+        }
+      }
+
+      let venueName = req.body.venueName || req.body['venue[name]'] || (typeof req.body.venue === 'object' ? req.body.venue?.name : '') || '';
+      let venueAddress = req.body.venueAddress || req.body['venue[address]'] || (typeof req.body.venue === 'object' ? req.body.venue?.address : '') || '';
+      let venueCity = req.body.venueCity || req.body['venue[city]'] || (typeof req.body.venue === 'object' ? req.body.venue?.city : '') || '';
+
+      if (!venueName && typeof req.body.venue === 'string') {
+        try {
+          const parsed = JSON.parse(req.body.venue);
+          venueName = parsed.name || '';
+          venueAddress = parsed.address || '';
+          venueCity = parsed.city || '';
+        } catch (e) {
+          venueName = req.body.venue;
         }
       }
 
       const venue = {
-        name: req.body.venueName || "",
-        address: req.body.venueAddress || "",
-        city: req.body.venueCity || "",
+        name: venueName,
+        address: venueAddress,
+        city: venueCity,
       };
 
       const newEvent = await Event.create({

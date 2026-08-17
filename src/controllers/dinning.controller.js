@@ -46,7 +46,22 @@ export const createDining = async (req, res) => {
 // @route   GET /api/dining/getAllDining
 export const getAllDining = async (req, res) => {
     try {
-        const diningSpots = await Dining.find({});
+        const {query}=req.query;
+        let filter={};
+
+        console.log("🔍 [getAllDining] Received req.query:", req.query);
+
+        if(query && typeof query === 'string' && query.trim() !== ""){
+            const searchRegex = new RegExp(query.trim(), 'i'); // Case-insensitive search
+            filter = { $or: [{ name: searchRegex }, { location: searchRegex },{description: searchRegex}] };
+        }
+
+        console.log("🔍 [getAllDining] Applied MongoDB Filter:", JSON.stringify(filter));
+
+        const diningSpots = await Dining.find(filter).sort({ createdAt: -1 });
+
+        console.log(`🔍 [getAllDining] Found ${diningSpots.length} spots:`, diningSpots.map(s => ({ id: s._id, name: s.name, location: s.location, description: s.description })));
+
         return res.status(200).json({ dining: diningSpots });
     } catch (error) {
         console.error("Error in getAllDining:", error);

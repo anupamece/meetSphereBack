@@ -30,6 +30,9 @@ const diningSchema = new mongoose.Schema({
 },
 {timestamps: true});
 
+// Text index for keyword search support across name, location, and description
+diningSchema.index({ name: "text", location: "text", description: "text" });
+
 const Dining = mongoose.model('Dining', diningSchema)
 
 export default Dining
